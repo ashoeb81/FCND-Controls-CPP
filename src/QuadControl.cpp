@@ -7,6 +7,7 @@
 #include "Trajectory.h"
 #include "BaseController.h"
 #include "Math/Mat3x3F.h"
+#include <math.h>
 
 #ifdef __PX4_NUTTX
 #include <systemlib/param/param.h>
@@ -69,6 +70,7 @@ VehicleCommand QuadControl::GenerateMotorCommands(float collThrustCmd, V3F momen
   // You'll need the arm length parameter L, and the drag/thrust ratio kappa
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
+  float l = L / sqrt(2);
 
   cmd.desiredThrustsN[0] = mass * 9.81f / 4.f; // front left
   cmd.desiredThrustsN[1] = mass * 9.81f / 4.f; // front right
@@ -95,13 +97,12 @@ V3F QuadControl::BodyRateControl(V3F pqrCmd, V3F pqr)
   //  - you'll also need the gain parameter kpPQR (it's a V3F)
 
   V3F momentCmd;
-
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
-
-  
-
+  momentCmd[1] = kpPQR[1] * (pqrCmd[1] - pqr[1]) * Ixx;
+  momentCmd[2] = kpPQR[2] * (pqrCmd[2] - pqr[2]) * Iyy;
+  momentCmd[3] = kpPQR[3] * (pqrCmd[3] - pqr[3]) * Izz;
+  #momentCmd.constrain(kappa*minMotorThrust, kappa*maxMotorThrust);
   /////////////////////////////// END STUDENT CODE ////////////////////////////
-
   return momentCmd;
 }
 
